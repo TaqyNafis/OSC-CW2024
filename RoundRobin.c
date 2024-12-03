@@ -11,7 +11,7 @@ typedef struct Process {
     int remainingBurstTime;
     int ioWaitTime;
     int remainingIoWaitTime;
-    char status[10]; // Ready, Running, Blocked
+    char status[10]; // Ready, Running, Blocked, Completed
     int startTime;
     int completionTime;
     int responded; // Indicates if the process has been responded to
@@ -89,7 +89,7 @@ void inputProcesses() {
 void roundRobinScheduling() {
     int completedProcesses = 0;
 
-    printf("\nTime\tProcess ID\tStatus\tRemaining Time\n");
+    printf("\nTime\tProcess ID\tStatus\t\tRemaining Time\n");
 
     while (completedProcesses < numProcesses) {
         int processRun = 0; // Tracks if a process runs in the current cycle
@@ -108,7 +108,7 @@ void roundRobinScheduling() {
 
                 // Run the process
                 int executionTime = (p->remainingBurstTime > timeQuantum) ? timeQuantum : p->remainingBurstTime;
-                printf("%d\t%d\tRunning\t%d\n", time, p->id, p->remainingBurstTime - executionTime);
+                printf("%d\t%d\tRunning\t\t%d\n", time, p->id, p->remainingBurstTime - executionTime);
                 totalCpuTime += executionTime;
                 time += executionTime;
                 p->remainingBurstTime -= executionTime;
@@ -137,11 +137,19 @@ void roundRobinScheduling() {
             }
         }
 
-        // Print status of all blocked processes
+        // Print status of all Ready processes
+        for (int i = 0; i < numProcesses; i++) {
+            Process *p = &processes[i];
+            if (strcmp(p->status, "Ready") == 0 && p->remainingBurstTime > 0) {
+                printf("%d\t%d\tReady\t\t%d\n", time, p->id, p->remainingBurstTime);
+            }
+        }
+
+        // Print status of all Blocked processes
         for (int i = 0; i < numProcesses; i++) {
             Process *p = &processes[i];
             if (strcmp(p->status, "Blocked") == 0) {
-                printf("%d\t%d\tBlocked\t%d\n", time, p->id, p->remainingBurstTime);
+                printf("%d\t%d\tBlocked\t\t%d\n", time, p->id, p->remainingBurstTime);
             }
         }
 
